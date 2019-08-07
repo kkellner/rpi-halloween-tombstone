@@ -1,2 +1,2 @@
-# rpi-halloween-tombstone
-Raspberry Pi Fountain Project - Control Halloween NeoPixel lights illuminating tombstones 
+# rpi-halloween-tombstone-lights
+Raspberry PI software to control halloween tombstone lights
