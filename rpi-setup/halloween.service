@@ -17,8 +17,8 @@ WorkingDirectory=/home/pi/rpi-halloween-tombstone
 # The following "file:" option requires systemd version 236 or newer 
 # 2019-04-08-raspbian-stretch-lite has version 232
 # To show version run: systemctl --version
-StandardOutput=file:/var/log/halloween.log
-StandardError=file:/var/log/halloween.log
+StandardOutput=append:/var/log/halloween.log
+StandardError=append:/var/log/halloween.log
 Restart=always
 User=root
 
