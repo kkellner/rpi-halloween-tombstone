@@ -30,7 +30,8 @@ class LightState(Enum):
     ERROR = 3
     OFF = 10
     NIGHT_LIGHT = 11
-    SHOW_PATH = 12
+    LIGHTNING = 12
+    RED = 13
     TEST1 = 100
     TEST2 = 100
     TEST3 = 100
@@ -44,7 +45,7 @@ class Light:
     pixel_pin = board.D18
 
     # The number of NeoPixels
-    num_pixels =  56
+    num_pixels =  28
 
     display_auto_off_time_seconds = 5
 
@@ -127,23 +128,45 @@ class Light:
         self.turnLightOff()
 
     def _setLight_NIGHT_LIGHT(self):
-        for i in range(28):
-            self.pixels[i] = (2,1,0,0)
-        for i in range(29,56, 1):
+        for i in range(16):
+            self.pixels[i] = (0,0,0,0)
+        for i in range(16, 26, 1):
+            self.pixels[i] = (0,0,0,60)
+        for i in range(26, Light.num_pixels, 1):
             self.pixels[i] = (0,0,0,0)
         self.pixels.show()
 
     def _setLight_TEST1(self):
-        for i in range(28):
-            self.pixels[i] = (4,0,0,0)
-        for i in range(29,56, 1):
-            self.pixels[i] = (0,0,4,0)
+        for i in range(16):
+            self.pixels[i] = (0,0,0,0)
+        for i in range(16, 26, 1):
+            self.pixels[i] = (60,60,20,0)
+        for i in range(26, Light.num_pixels, 1):
+            self.pixels[i] = (0,0,0,0)
         self.pixels.show()
 
-    def _setLight_SHOW_PATH(self):
-        for i in range(56):
-            self.pixels[i] = (0,0,0,20)
+    def _setLight_RED(self):
+        for i in range(16):
+            self.pixels[i] = (0,0,0,0)
+        for i in range(16, 26, 1):
+            self.pixels[i] = (70,10,0,0)
+        for i in range(26, Light.num_pixels, 1):
+            self.pixels[i] = (0,0,0,0)
         self.pixels.show()
+
+    def _setLight_LIGHTNING(self):
+        for f in range(3):
+            for i in range(16):
+                self.pixels[i] = (0,0,0,0)
+            for i in range(16, 26, 1):
+                self.pixels[i] = (200,200,200,200)
+            for i in range(26, Light.num_pixels, 1):
+                self.pixels[i] = (0,0,0,0)
+            self.pixels.show()
+            time.sleep(0.100)
+            self.pixels.fill((0, 0, 0, 0))
+            self.pixels.show()
+            time.sleep(0.150)
 
 
     def showStartup(self):

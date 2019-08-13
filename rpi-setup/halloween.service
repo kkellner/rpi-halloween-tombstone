@@ -12,13 +12,13 @@ After=network.target
 [Service]
 ExecStart=/usr/bin/python3 -u /home/pi/rpi-halloween-tombstone/halloween.py
 WorkingDirectory=/home/pi/rpi-halloween-tombstone
-StandardOutput=inherit
-StandardError=inherit
+#StandardOutput=inherit
+#StandardError=inherit
 # The following "file:" option requires systemd version 236 or newer 
 # 2019-04-08-raspbian-stretch-lite has version 232
 # To show version run: systemctl --version
-StandardOutput=file:/var/log/fountain.log
-StandardError=file:/var/log/fountain.log
+StandardOutput=file:/var/log/halloween.log
+StandardError=file:/var/log/halloween.log
 Restart=always
 User=root
 
