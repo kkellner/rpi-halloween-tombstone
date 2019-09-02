@@ -10,6 +10,8 @@ import board
 import RPi.GPIO as GPIO
 import neopixel
 from enum import Enum
+#from frame import LED_light
+import flame
 
 logger = logging.getLogger('light')
 
@@ -31,6 +33,8 @@ class LightState(Enum):
     NIGHT_LIGHT = 11
     LIGHTNING = 12
     RED = 13
+    HALLOWEEN = 14
+    FLAME = 15
     TEST1 = 100
     TEST2 = 100
     TEST3 = 100
@@ -44,7 +48,7 @@ class Light:
     pixel_pin = board.D18
 
     # The number of NeoPixels
-    num_pixels =  28
+    num_pixels = 144 
 
     display_auto_off_time_seconds = 5
 
@@ -63,6 +67,7 @@ class Light:
 
 
     def shutdown(self):
+        flame.stopFlame()
         self.turnLightOff()
 
     def getUserLightStates(self): 
@@ -90,6 +95,7 @@ class Light:
         return result
 
     def _setLight_OFF(self):
+        self.stopLightAnimation()
         self.turnLightOff()
 
     def transision(self, fromColor, toColor, speed):
@@ -97,45 +103,54 @@ class Light:
         self.turnLightOff()
 
     def _setLight_NIGHT_LIGHT(self):
-        for i in range(16):
-            self.pixels[i] = (0,0,0,0)
-        for i in range(16, 26, 1):
+        self.stopLightAnimation()
+        for i in range(8):
             self.pixels[i] = (0,0,0,60)
-        for i in range(26, Light.num_pixels, 1):
-            self.pixels[i] = (0,0,0,0)
+        for i in range(8, 144, 1):
+            self.pixels[i] = (0,0,0,60)
         self.pixels.show()
 
     def _setLight_TEST1(self):
-        for i in range(16):
-            self.pixels[i] = (0,0,0,0)
-        for i in range(16, 26, 1):
-            self.pixels[i] = (60,60,20,0)
-        for i in range(26, Light.num_pixels, 1):
-            self.pixels[i] = (0,0,0,0)
+        self.stopLightAnimation()
+        for i in range(8):
+            self.pixels[i] = (60,0,0,0)
+        for i in range(8, 144, 1):
+            self.pixels[i] = (0,60,0,0)
         self.pixels.show()
 
     def _setLight_RED(self):
-        for i in range(16):
-            self.pixels[i] = (0,0,0,0)
-        for i in range(16, 26, 1):
-            self.pixels[i] = (70,10,0,0)
-        for i in range(26, Light.num_pixels, 1):
-            self.pixels[i] = (0,0,0,0)
+        for i in range(8):
+            self.pixels[i] = (100,0,0,0)
+        for i in range(8, 16, 1):
+            self.pixels[i] = (100,0,0,0)
         self.pixels.show()
 
+    def _setLight_HALLOWEEN(self):
+        self.stopLightAnimation()
+        for i in range(8):
+            self.pixels[i] = (100,20,0,0)
+        for i in range(8, 16, 1):
+            self.pixels[i] = (100,20,0,0)
+        self.pixels.show()
+
+    def _setLight_FLAME(self):
+        #LED_COUNT = 8
+        flame.np = self.pixels
+        flame.startFlame()
+
+        
     def _setLight_LIGHTNING(self):
         for f in range(3):
-            for i in range(16):
-                self.pixels[i] = (0,0,0,0)
-            for i in range(16, 26, 1):
+            for i in range(0, 16, 1):
                 self.pixels[i] = (200,200,200,200)
-            for i in range(26, Light.num_pixels, 1):
-                self.pixels[i] = (0,0,0,0)
             self.pixels.show()
             time.sleep(0.100)
             self.pixels.fill((0, 0, 0, 0))
             self.pixels.show()
             time.sleep(0.150)
+
+    def stopLightAnimation(self):
+        flame.stopFlame()
 
 
     def showStartup(self):
