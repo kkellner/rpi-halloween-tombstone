@@ -25,19 +25,20 @@ logger = logging.getLogger('flame')
 
 # number of leds in the strip
 LED_COUNT = 1
+BRIGHTNESS = 1
 # base color
-# r = 99
-# g = 31
-# b = 6
+r = 99 * BRIGHTNESS
+g = 31 * BRIGHTNESS
+b = 6 * BRIGHTNESS
 # 150% brighter:
 # r = 148
 # g = 46
 # b = 9
 # 200% brighter:
-r = 198
-g = 62
-b = 12
-
+#r = 198
+#g = 62
+#b = 12
+SIDE_PIXEL_COLOR=(100,15,0,0)
 
 np = None
 flame_thread = None
@@ -48,29 +49,40 @@ flame_thread_stop = True
 #def show():
 #   np.write()
 
-def Color(r, g, b):
-    return (int(r), int(g), int(b))
-
-def setPixelColor(i, color):
-    #np[i] = color
-    #for i in range(3, 5, 1):
-    for i in range(2, 6, 1):
-        np[i] = color
-
-def wait(ms):
-   time.sleep(ms/1000.0)
-
-def randint(min, max):
-    return random.randrange(min, max)
-    #return min + int(int.from_bytes(os.urandom(2), 10) / 65536.0 * (max - min + 1))
-
-def c_brightness(c, brightness):
-    return max(0, min(c * (brightness / 100), 255))
-
 class LED_light(object):
-    def __init__(self, pos):
+
+    def __init__(self, displayPixelOffset, displayPixelSize, displayFlamePixelOffset, displayFlamePixelSize):
         self.time = 0
-        self.pos = pos
+        self.displayPixelOffset = displayPixelOffset
+        self.displayPixelSize = displayPixelSize
+        self.displayFlamePixelOffset = displayFlamePixelOffset
+        self.displayFlamePixelSize = displayFlamePixelSize
+        logger.info("displayPixelOffset: %d", displayPixelOffset)
+
+    def Color(self, r, g, b):
+        return (int(r), int(g), int(b))
+
+    def setPixelColor(self, color):
+        flamePos = self.displayPixelOffset+self.displayFlamePixelOffset
+
+        # Set LEFT side pixels of display flame to solid color
+        for i in range(self.displayPixelOffset, flamePos):
+            np[i] = SIDE_PIXEL_COLOR
+
+        # Set RIGHT side pixels of display flame to solid color
+        for i in range(flamePos + self.displayFlamePixelSize, flamePos + self.displayFlamePixelSize + self.displayFlamePixelOffset):
+            np[i] = SIDE_PIXEL_COLOR
+
+        # Set the FLAME pixels
+        for i in range(flamePos, flamePos+self.displayFlamePixelSize, 1):
+            np[i] = color
+
+    def randint(self, min, max):
+        return random.randrange(min, max)
+        #return min + int(int.from_bytes(os.urandom(2), 10) / 65536.0 * (max - min + 1))
+
+    def c_brightness(self, c, brightness):
+        return max(0, min(c * (brightness / 100), 255))
 
     def update(self, delta):
         self.time = self.time - delta
@@ -79,7 +91,7 @@ class LED_light(object):
             self.random_duration()
 
     def set_brightness(self, brightness):
-        setPixelColor(self.pos, Color(c_brightness(r, brightness), c_brightness(g, brightness), c_brightness(b, brightness)))
+        self.setPixelColor(self.Color(self.c_brightness(r, brightness), self.c_brightness(g, brightness), self.c_brightness(b, brightness)))
 
 
     def random_mode(self):
@@ -90,20 +102,20 @@ class LED_light(object):
         #  5% 40% –  50% (very noticeable, blown out flame)
         # 10% 30% –  40% (very noticeable, blown out flame)
         brightness = 0
-        r = randint(0, 100)
+        r = self.randint(0, 100)
         if r < 50:
-            brightness = randint(77, 80)
+            brightness = self.randint(77, 80)
         elif r < 80:
-            brightness = randint(80, 100)
+            brightness = self.randint(80, 100)
         elif r < 85:
-            brightness = randint(50, 80)
+            brightness = self.randint(50, 80)
         elif r < 90:
-            brightness = randint(40, 50)
+            brightness = self.randint(40, 50)
         elif r < 91:
-            brightness = randint(120, 150)
-            logger.info("bright")
+            brightness = self.randint(120, 150)
+            #logger.info("bright")
         else:
-            brightness = randint(30, 40)
+            brightness = self.randint(30, 40)
         self.set_brightness(brightness)
 
     def random_duration(self):
@@ -112,50 +124,64 @@ class LED_light(object):
         #  3% 20 – 30 ms
         #  3% 10 – 20 ms
         #  4%  0 – 10 ms
-        r = randint(0, 100)
+        r = self.randint(0, 100)
         if r < 90:
             self.time = 20
         elif r < 93:
-            self.time = randint(20, 30)
+            self.time = self.randint(20, 30)
         elif r < 96:
-            self.time = randint(10, 20)
+            self.time = self.randint(10, 20)
         else:
-            self.time = randint(0, 10)
+            self.time = self.randint(0, 10)
 
-# class Flame(object):
-#     def __init__(self, np):
-#         # TODO
+class Flames(object):
+    def __init__(self, pixels, displayCount, displayPixelSize, displayFlamePixelOffset, displayFlamePixelSize):
+        global np
+        np = pixels
+        self.displayCount = displayCount
+        self.displayPixelSize = displayPixelSize
+        self.displayFlamePixelOffset = displayFlamePixelOffset
+        self.displayFlamePixelSize = displayFlamePixelSize
 
-def startFlame():
-    global flame_thread
-    global flame_thread_stop
-    if flame_thread is None:
-        logger.info('flame thread start request')
-        flame_thread = threading.Thread(
-            target=flameThread)
-        flame_thread.daemon = True
-        flame_thread_stop = False
-        flame_thread.start()
-
-
-def stopFlame():
-    global flame_thread
-    global flame_thread_stop
-    if flame_thread is not None:
-        logger.info('flame thread stop request')
-        flame_thread_stop = True
-        flame_thread.join()
-        flame_thread = None
-        logger.info('flame thread stopped')
- 
+    def startFlames(self):
+        global flame_thread
+        global flame_thread_stop
+        if flame_thread is None:
+            logger.info('flame thread start request')
+            flame_thread = threading.Thread(target=self.flameThread)
+            flame_thread.daemon = True
+            flame_thread_stop = False
+            flame_thread.start()
 
 
-def flameThread():
-    global flame_thread_stop
-    candles = [LED_light(i) for i in range(LED_COUNT)]
-    while not flame_thread_stop:
-        now = time.time() * 1000
-        [l.update(now) for l in candles]
-        np.show()
-        wait(50)
+    def stopFlames(self):
+        global flame_thread
+        global flame_thread_stop
+        if flame_thread is not None:
+            logger.info('flame thread stop request')
+            flame_thread_stop = True
+            flame_thread.join()
+            flame_thread = None
+            logger.info('flame thread stopped')
+    
+
+
+    def flameThread(self):
+        global flame_thread_stop
+        candles = [
+            LED_light(
+                (i*self.displayPixelSize), 
+                self.displayPixelSize,
+                self.displayFlamePixelOffset,
+                self.displayFlamePixelSize) for i in range(self.displayCount)
+            ]
+        #candles = [LED_light(i) for i in range(LED_COUNT)]
+        while not flame_thread_stop:
+            now = time.time() * 1000
+            [l.update(now) for l in candles]
+            np.show()
+            self.wait_ms(50)
+
+    def wait_ms(self, ms):
+        time.sleep(ms/1000.0)
 

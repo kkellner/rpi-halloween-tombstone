@@ -55,6 +55,7 @@ class Light:
     def __init__(self, basalt):
         self.basalt = basalt
         self.lightState = LightState.UNKNOWN
+        self.flames = None
 
         # Docs: https://circuitpython.readthedocs.io/projects/neopixel/en/latest/api.html
         self.pixels = neopixel.NeoPixel(pin=Light.pixel_pin, n=Light.num_pixels,
@@ -67,7 +68,7 @@ class Light:
 
 
     def shutdown(self):
-        flame.stopFlame()
+        self.flames.stopFlames()
         self.turnLightOff()
 
     def getUserLightStates(self): 
@@ -135,8 +136,8 @@ class Light:
 
     def _setLight_FLAME(self):
         #LED_COUNT = 8
-        flame.np = self.pixels
-        flame.startFlame()
+        self.flames = flame.Flames(self.pixels, 2, 8, 2, 4)
+        self.flames.startFlames()
 
         
     def _setLight_LIGHTNING(self):
@@ -150,7 +151,7 @@ class Light:
             time.sleep(0.150)
 
     def stopLightAnimation(self):
-        flame.stopFlame()
+        self.flames.stopFlames()
 
 
     def showStartup(self):
