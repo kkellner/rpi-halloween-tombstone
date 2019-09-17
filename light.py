@@ -10,8 +10,16 @@ import board
 import RPi.GPIO as GPIO
 import neopixel
 from enum import Enum
-#from frame import LED_light
 import flame
+
+
+from light_segment import LightSegment
+from light_pattern_ghost import LightPatternGhost
+from light_pattern_flame import LightPatternFlame
+from light_pattern_startup import LightPatternStartup
+from light_pattern_off import LightPatternOff
+from light_strand import LightStrand
+
 
 logger = logging.getLogger('light')
 
@@ -57,18 +65,12 @@ class Light:
         self.lightState = LightState.UNKNOWN
         self.flames = None
 
-        # Docs: https://circuitpython.readthedocs.io/projects/neopixel/en/latest/api.html
-        self.pixels = neopixel.NeoPixel(pin=Light.pixel_pin, n=Light.num_pixels,
-                                        brightness=1.0, auto_write=False,
-                                        pixel_order=neopixel.GRBW)
-
-        # Configure motion detection
-        #GPIO.setup(Light.motion_detect_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        #GPIO.add_event_detect(Light.motion_detect_pin, GPIO.BOTH, callback=self.motionHandler)
+        self.lightStrand = LightStrand(Light.pixel_pin, Light.num_pixels)
 
 
     def shutdown(self):
-        self.flames.stopFlames()
+        if self.flames is not None:
+            self.flames.stopFlames()
         self.turnLightOff()
 
     def getUserLightStates(self): 
@@ -135,11 +137,19 @@ class Light:
         self.pixels.show()
 
     def _setLight_FLAME(self):
-        #LED_COUNT = 8
-        self.flames = flame.Flames(self.pixels, 2, 8, 2, 4)
-        self.flames.startFlames()
+        strand = self.lightStrand
+        strand.removeAllSegments()
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternGhost() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        self.lightStrand.startUpdates()
 
-        
+
     def _setLight_LIGHTNING(self):
         for f in range(3):
             for i in range(0, 16, 1):
@@ -158,11 +168,18 @@ class Light:
         self._STARTUP_Sequence()
 
     def _STARTUP_Sequence(self):
-        self.pixels.fill((0, 0, 1, 0))
-        self.pixels.show()
+        strand = self.lightStrand
+
+        strand.addSegment(LightSegment(self.lightStrand, Light.num_pixels, LightPatternStartup() ))
+        self.lightStrand.update(time.time() * 1000)
         time.sleep(1)
-        self.pixels.fill((0, 0, 0, 0))
-        self.pixels.show()
+        strand.removeAllSegments()
+        strand.addSegment(LightSegment(self.lightStrand, Light.num_pixels, LightPatternOff() ))
+        self.lightStrand.update(time.time() * 1000)
+        strand.removeAllSegments()
+
+
+
 
     def _ERROR_Sequence(self):
         speed = 0.2
