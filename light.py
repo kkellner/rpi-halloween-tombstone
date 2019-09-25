@@ -10,13 +10,14 @@ import board
 import RPi.GPIO as GPIO
 import neopixel
 from enum import Enum
-import flame
+
 
 
 from light_segment import LightSegment
 from light_pattern_ghost import LightPatternGhost
 from light_pattern_flame import LightPatternFlame
 from light_pattern_startup import LightPatternStartup
+from light_pattern_lightning import LightPatternLightning
 from light_pattern_off import LightPatternOff
 from light_strand import LightStrand
 
@@ -63,14 +64,10 @@ class Light:
     def __init__(self, basalt):
         self.basalt = basalt
         self.lightState = LightState.UNKNOWN
-        self.flames = None
-
         self.lightStrand = LightStrand(Light.pixel_pin, Light.num_pixels)
 
 
     def shutdown(self):
-        if self.flames is not None:
-            self.flames.stopFlames()
         self.turnLightOff()
 
     def getUserLightStates(self): 
@@ -83,8 +80,12 @@ class Light:
 
     def turnLightOff(self):
         logger.info('In turnLightOff')
-        self.pixels.fill((0, 0, 0, 0))
-        self.pixels.show()
+        #self.pixels.fill((0, 0, 0, 0))
+        #self.pixels.show()
+        self.lightStrand.removeAllSegments()
+        self.lightStrand.addSegment(LightSegment(self.lightStrand, Light.num_pixels, LightPatternOff() ))
+        self.lightStrand.update()
+
 
     def getLightState(self):
         return self.lightState
@@ -142,8 +143,8 @@ class Light:
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternGhost() ))
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
-        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
-        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternGhost() ))
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternGhost() ))
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
@@ -151,17 +152,14 @@ class Light:
 
 
     def _setLight_LIGHTNING(self):
-        for f in range(3):
-            for i in range(0, 16, 1):
-                self.pixels[i] = (200,200,200,200)
-            self.pixels.show()
-            time.sleep(0.100)
-            self.pixels.fill((0, 0, 0, 0))
-            self.pixels.show()
-            time.sleep(0.150)
+        strand = self.lightStrand
+        strand.removeAllSegments()
+        strand.addSegment(LightSegment(self.lightStrand, Light.num_pixels, LightPatternLightning() ))
+        self.lightStrand.startUpdates()
+
 
     def stopLightAnimation(self):
-        self.flames.stopFlames()
+        self.lightStrand.stopUpdates()
 
 
     def showStartup(self):
@@ -171,14 +169,12 @@ class Light:
         strand = self.lightStrand
 
         strand.addSegment(LightSegment(self.lightStrand, Light.num_pixels, LightPatternStartup() ))
-        self.lightStrand.update(time.time() * 1000)
+        self.lightStrand.update()
         time.sleep(1)
         strand.removeAllSegments()
         strand.addSegment(LightSegment(self.lightStrand, Light.num_pixels, LightPatternOff() ))
-        self.lightStrand.update(time.time() * 1000)
+        self.lightStrand.update()
         strand.removeAllSegments()
-
-
 
 
     def _ERROR_Sequence(self):

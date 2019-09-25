@@ -55,7 +55,16 @@ class LightStrand:
     def removeAllSegments(self):
         self.segments = []
 
-    def update(self, updateTime):
+
+    def update(self):
+        self.stopUpdates()
+        self.__update()
+
+
+    def __update(self, updateTime=None):
+        if updateTime is None:
+            updateTime = time.time() * 1000
+
         for seg in self.segments:
             seg.update(updateTime)
         self.pixels.show()
@@ -84,11 +93,7 @@ class LightStrand:
 
     def updateThread(self):
         while not self.update_thread_stop:
-            now = time.time() * 1000
-
-            for seg in self.segments:
-                seg.update(now)
-
+            self.__update()
             self.pixels.show()
             self.wait_ms(50)
 
