@@ -16,6 +16,7 @@ import signal
 import sys
 import os
 
+from pubsub import Pubsub
 from light import Light
 from http_request import HttpServer
 from rpi_info import RpiInfo
@@ -28,6 +29,7 @@ class Halloween:
     """Handle Halloween display operations"""
 
     def __init__(self):
+        self.pubsub = None
         self.server = None
         self.light = None
         self.rpi_info = None
@@ -60,6 +62,8 @@ class Halloween:
             self.server.shutdown()
         if self.light is not None:
             self.light.shutdown()
+        if self.pubsub is not None:
+            self.pubsub.shutdown()
         GPIO.cleanup()
         sys.tracebacklimit = 0
         sys.exit(0)
@@ -67,6 +71,7 @@ class Halloween:
     def startup(self):
         logger.info('Startup...')
 
+        self.pubsub = Pubsub(self)
         self.light = Light(self)
         self.light.showStartup()
         self.rpi_info = RpiInfo(self)
