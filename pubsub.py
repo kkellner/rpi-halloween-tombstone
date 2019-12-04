@@ -43,7 +43,7 @@ class Pubsub:
     deviceName = "light"
     queueDeviceStatus = queueNamespace + "/device/" + typeName + "/" +locationName + "/" + nodeName + "/" + deviceName + "/status"
     queueDeviceAllStatus = queueNamespace + "/device/" + typeName + "/" +locationName + "/ALL/" + deviceName + "/status"
-
+ 
     def __init__(self, basalt):
         self.basalt = basalt
 
@@ -181,7 +181,7 @@ class Pubsub:
         return self.publishEventString(eventQueue, data_out, retain)
 
     def publishEventString(self, eventQueue, eventString, retain=False):
-        logger.info("Publish to queue [%s] data: [%s]", eventQueue, eventString)
+        logger.info("Publish to queue:[%s] data:[%s] retain:[%s]", eventQueue, eventString, retain)
         msg_info = self.client.publish(eventQueue, eventString, qos=0, retain=retain)
         #msg_info.wait_for_publish()
         return msg_info

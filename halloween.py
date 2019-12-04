@@ -71,9 +71,9 @@ class Halloween:
     def startup(self):
         logger.info('Startup...')
 
-        self.pubsub = Pubsub(self)
         self.light = Light(self)
         self.light.showStartup()
+        self.pubsub = Pubsub(self)
         self.rpi_info = RpiInfo(self)
  
         self.server = HttpServer(self)
