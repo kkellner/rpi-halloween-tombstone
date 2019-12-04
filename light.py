@@ -20,6 +20,8 @@ from light_pattern_startup import LightPatternStartup
 from light_pattern_lightning import LightPatternLightning
 from light_pattern_off import LightPatternOff
 from light_pattern_full_on import LightPatternFullOn
+from light_pattern_snowman import LightPatternSnowman
+from light_pattern_xmas_tree import LightPatternXmasTree
 from light_strand import LightStrand
 
 
@@ -46,6 +48,7 @@ class LightState(Enum):
     HALLOWEEN = 14
     FLAME = 15
     FULL_ON = 16
+    XMAS = 17
     TEST1 = 100
     TEST2 = 100
     TEST3 = 100
@@ -139,14 +142,6 @@ class Light:
         self.pixels.show()
 
     def _setLight_HALLOWEEN(self):
-        self.stopLightAnimation()
-        for i in range(8):
-            self.pixels[i] = (100,20,0,0)
-        for i in range(8, 16, 1):
-            self.pixels[i] = (100,20,0,0)
-        self.pixels.show()
-
-    def _setLight_FLAME(self):
         strand = self.lightStrand
         strand.removeAllSegments()
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternGhost() ))
@@ -158,6 +153,28 @@ class Light:
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
         strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternFlame() ))
         self.lightStrand.startUpdates()
+
+
+    def _setLight_XMAS(self):
+        strand = self.lightStrand
+        strand.removeAllSegments()
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternSnowman() )) # Snowman
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternXmasTree() )) # Tree
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternOff() ))   # Off
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternSnowman() )) # Snowman
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternOff() )) # Off
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternOff() )) # Off
+        strand.addSegment(LightSegment(self.lightStrand, 8, LightPatternOff() )) # Off
+        self.lightStrand.startUpdates()
+
+
+    def _setLight_FLAME(self):
+        self.stopLightAnimation()
+        for i in range(8):
+            self.pixels[i] = (100,20,0,0)
+        for i in range(8, 16, 1):
+            self.pixels[i] = (100,20,0,0)
+        self.pixels.show()
 
 
     def _setLight_LIGHTNING(self):

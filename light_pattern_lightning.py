@@ -22,7 +22,7 @@ class LightPatternLightning(LightPattern):
 
     def update(self, updateTime):
 
-        ON_COLOR = (200,200,200,200)
+        ON_COLOR = (250,250,250,250)
         OFF_COLOR = (0, 0, 0, 0)
 
         if self.firstUpdate == 0:

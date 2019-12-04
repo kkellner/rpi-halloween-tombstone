@@ -6,7 +6,7 @@
 from light_pattern import LightPattern
 
 
-class LightPatternGhost(LightPattern):
+class LightPatternSnowman(LightPattern):
 
 
     def __init__(self):
