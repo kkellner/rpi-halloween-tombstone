@@ -19,6 +19,6 @@ class LightPatternXmasTree(LightPattern):
         #self.lightSegment.setPixelColor(0, (0,0,0,0))
         #self.lightSegment.setPixelColor(self.lightSegment.numOfSegmentPixels-1, (0,0,0,0))
 
-        for i in range(0, self.lightSegment.numOfSegmentPixels):
+        for i in range(0, self.lightSegment.numOfSegmentPixels-1):
             self.lightSegment.setPixelColor(i, (0,255,0,0))
 
