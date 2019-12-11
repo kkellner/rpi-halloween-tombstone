@@ -15,6 +15,6 @@ class LightPatternFullOn(LightPattern):
 
     def update(self, updateTime):
 
-        for i in range(0, self.lightSegment.numOfSegmentPixels):
+        for i in range(0, self.lightSegment.numOfSegmentPixels-1):
             self.lightSegment.setPixelColor(i, (255,255,255,255))
 

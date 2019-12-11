@@ -3,3 +3,8 @@ mqtt:
   port: 1883
   username: USERNAME
   password: PASSWORD
+  queue:
+    queueNamespace: yukon
+    locationName: front
+    typeName: halloween-tombstone
+    deviceName: light  

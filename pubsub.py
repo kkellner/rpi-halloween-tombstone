@@ -31,18 +31,6 @@ logger = logging.getLogger('pubsub')
 #
 class Pubsub:
 
-
-    # Node name example: yukon/node/rpibasalt1/status
-    queueNamespace = "yukon"
-    nodeName = os.uname().nodename
-    queueNodeStatus = queueNamespace + "/node/" + nodeName + "/status"
-
-    # Device name example: yukon/device/basalt/driveway/basalt1/light/status
-    locationName = "front"
-    typeName = "halloween-tombstone"
-    deviceName = "light"
-    queueDeviceStatus = queueNamespace + "/device/" + typeName + "/" +locationName + "/" + nodeName + "/" + deviceName + "/status"
-    queueDeviceAllStatus = queueNamespace + "/device/" + typeName + "/" +locationName + "/ALL/" + deviceName + "/status"
  
     def __init__(self, basalt):
         self.basalt = basalt
@@ -56,9 +44,24 @@ class Pubsub:
         self.mqttBrokerUsername = mqttConfig['username']
         self.mqttBrokerPassword = mqttConfig['password']
 
-        logger.info("Node name: %s Node MQTT: %s Device MQTT: %s", Pubsub.nodeName, Pubsub.queueNodeStatus, Pubsub.queueDeviceStatus )
+        self.queueNamespace = mqttConfig['queue']['queueNamespace']
+        self.locationName = mqttConfig['queue']['locationName']
+        self.typeName = mqttConfig['queue']['typeName']
+        self.deviceName = mqttConfig['queue']['deviceName']
+
+
+        # Node name example: yukon/node/rpibasalt1/status
+        self.nodeName = os.uname().nodename
+        self.queueNodeStatus = self.queueNamespace + "/node/" + self.nodeName + "/status"
+
+        # Device name example: yukon/device/basalt/driveway/basalt1/light/status
+        self.queueDeviceStatus = self.queueNamespace + "/device/" + self.typeName + "/" + self.locationName + "/" + self.nodeName + "/" + self.deviceName + "/status"
+        self.queueDeviceAllStatus = self.queueNamespace + "/device/" + self.typeName + "/" + self.locationName + "/ALL/" + self.deviceName + "/status"
+
+
+        logger.info("Node name: %s Node MQTT: %s Device MQTT: %s", self.nodeName, self.queueNodeStatus, self.queueDeviceStatus )
         # Connect to MQTT broker
-        self.client = mqtt.Client(client_id=Pubsub.nodeName)
+        self.client = mqtt.Client(client_id=self.nodeName)
         mqttLogger = logging.getLogger('mqtt')
         self.client.enable_logger(mqttLogger)
         self.client.reconnect_delay_set(1, 30)
@@ -67,9 +70,9 @@ class Pubsub:
         self.client.on_connect = self.on_connect
         self.client.on_disconnect = self.on_disconnect
         deathPayload = "DISCONNECTED"
-        self.client.will_set(Pubsub.queueNodeStatus, deathPayload, 0, True)
+        self.client.will_set(self.queueNodeStatus, deathPayload, 0, True)
 
-        self.client.message_callback_add(Pubsub.queueDeviceAllStatus, self.on_message_light_status)
+        self.client.message_callback_add(self.queueDeviceAllStatus, self.on_message_light_status)
         self.client.on_message = self.on_message
 
         self.client.username_pw_set(self.mqttBrokerUsername, self.mqttBrokerPassword)
@@ -90,7 +93,7 @@ class Pubsub:
     def publishNodeBirth(self):
         logger.info("Publishing Node Birth")
         payload = "online"
-        self.client.publish(Pubsub.queueNodeStatus, payload, 0, True)
+        self.client.publish(self.queueNodeStatus, payload, 0, True)
 
     ######################################################################
     # Publish the DEVICE BIRTH certificate
@@ -98,7 +101,7 @@ class Pubsub:
     def publishDeviceBirth(self):
         logger.info("Publishing Device Birth")
         payload = "unknown"
-        self.client.publish(Pubsub.queueDeviceStatus, payload, 0, True)
+        self.client.publish(self.queueDeviceStatus, payload, 0, True)
 
     ######################################################################
     # Publish the NODE offline
@@ -106,12 +109,12 @@ class Pubsub:
     def publishNodeOffline(self):
         logger.info("Publishing Node Birth")
         payload = "offline"
-        self.client.publish(Pubsub.queueNodeStatus, payload, 0, True)
+        self.client.publish(self.queueNodeStatus, payload, 0, True)
         
     def on_connect(self, client, userdata, flags, rc):
         logger.info("Connected with result code "+str(rc))
         self.publishBirth()
-        self.client.subscribe(Pubsub.queueDeviceAllStatus, qos=2)
+        self.client.subscribe(self.queueDeviceAllStatus, qos=2)
 
     def on_disconnect(self, client, userdata, rc):
         logger.warn("Disconnected with result code "+str(rc))
@@ -163,7 +166,7 @@ class Pubsub:
             "time" : time.time(),
             "otherdata" : "some data"
         }
-        self.publishEventObject(Pubsub.queueDeviceStatus, data)
+        self.publishEventObject(self.queueDeviceStatus, data)
 
     ######################################################################
     # publish the current state of THIS light
@@ -173,7 +176,7 @@ class Pubsub:
             "lightState": lightStateName,
             "time" : time.time()
         }
-        self.publishEventObject(Pubsub.queueDeviceStatus, data, True)
+        self.publishEventObject(self.queueDeviceStatus, data, True)
 
 
     def publishEventObject(self, eventQueue, eventData, retain=False):
