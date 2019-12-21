@@ -3,7 +3,7 @@
 # sudo systemctl daemon-reload
 # sudo systemctl start halloween.service
 # sudo systemctl enable halloween.service
-#
+# sudo service halloween start
 
 [Unit]
 Description=RPi Halloween

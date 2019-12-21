@@ -16,6 +16,8 @@ from enum import Enum
 from light_segment import LightSegment
 from light_pattern_ghost import LightPatternGhost
 from light_pattern_flame import LightPatternFlame
+from light_pattern_lum_flame import LightPatternLumFlame
+from light_pattern_lum_xmas import LightPatternLumXmas
 from light_pattern_startup import LightPatternStartup
 from light_pattern_lightning import LightPatternLightning
 from light_pattern_off import LightPatternOff
@@ -49,6 +51,8 @@ class LightState(Enum):
     FLAME = 15
     FULL_ON = 16
     XMAS = 17
+    LUM_FLAME = 18
+    LUM_XMAS = 19
     TEST1 = 100
     TEST2 = 100
     TEST3 = 100
@@ -183,6 +187,19 @@ class Light:
         strand.addSegment(LightSegment(self.lightStrand, Light.num_pixels, LightPatternLightning() ))
         self.lightStrand.startUpdates()
 
+    def _setLight_LUM_FLAME(self):
+        strand = self.lightStrand
+        strand.removeAllSegments()
+        strand.addSegment(LightSegment(self.lightStrand, 16, LightPatternLumFlame() ))
+        strand.addSegment(LightSegment(self.lightStrand, 16, LightPatternLumFlame() ))
+        self.lightStrand.startUpdates()
+
+    def _setLight_LUM_XMAS(self):
+        strand = self.lightStrand
+        strand.removeAllSegments()
+        strand.addSegment(LightSegment(self.lightStrand, 16, LightPatternLumXmas() ))
+        strand.addSegment(LightSegment(self.lightStrand, 16, LightPatternLumXmas() ))
+        self.lightStrand.startUpdates()
 
     def _setLight_FULL_ON(self):
         strand = self.lightStrand
