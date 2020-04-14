@@ -10,10 +10,10 @@ from light_pattern import LightPattern
 
 BRIGHTNESS = 1
 # base color
-r = 99 * BRIGHTNESS
+r = 89 * BRIGHTNESS
 g = 31 * BRIGHTNESS
 b = 6 * BRIGHTNESS
-SIDE_PIXEL_COLOR=(100,15,0,0)
+SIDE_PIXEL_COLOR=(90,15,0,0)
 
 # Luminary Flame
 class LightPatternLumFlame(LightPattern):
